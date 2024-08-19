@@ -1,5 +1,3 @@
-// storage-adapter-import-placeholder
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -8,6 +6,7 @@ import sharp from 'sharp'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
+import { postgresAdapter } from '@payloadcms/db-postgres'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -16,7 +15,7 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     importMap: {
-      baseDir: path.resolve(dirname),
+      baseDir: dirname,
     },
   },
   collections: [Users, Media],
@@ -25,8 +24,10 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URI || '',
+  db: postgresAdapter({
+    pool: {
+      connectionString: process.env.DATABASE_URI || 'postgres://127.0.0.1:5432/payloadtests',
+    }
   }),
   sharp,
   plugins: [
